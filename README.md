@@ -21,12 +21,12 @@ npm run dev
 
 ## Endpoints
 
-### Health (STEP 2)
+### Health 
 
 - `GET /health` — process health
 - `GET /api/health` — API health
 
-### Auth (STEP 4) — `/api/auth`
+### Auth  — `/api/auth`
 
 - `POST /api/auth/register` — bootstrap first **admin** without auth; afterwards **admin-only** (Bearer access token)
 - `POST /api/auth/login` — returns `{ user, accessToken, refreshToken }`
@@ -40,7 +40,7 @@ Password rules: **≥ 8 chars**, uppercase, lowercase, number, special character
 
 Configure optional SMTP in `.env` for real reset emails; without SMTP, reset links are **logged to the console in non-production**.
 
-### Tickets & messages (STEP 5) — `/api/tickets`
+### Tickets & messages  — `/api/tickets`
 
 All routes require `Authorization: Bearer <accessToken>` unless noted.
 
@@ -70,7 +70,7 @@ All routes require `Authorization: Bearer <accessToken>` unless noted.
 
 Internal services used by mutations: `src/modules/auditlogs/auditlog.service.js`, `src/modules/notifications/notification.service.js`.
 
-### Socket.IO (STEP 6)
+### Socket.IO 
 
 Socket.IO shares the HTTP server (`server.js` → `attachSocketIO`). Client connects with the **same JWT** as REST:
 
@@ -108,7 +108,7 @@ const socket = io(BASE_URL, { auth: { token: accessToken } });
 
 REST mutations call emitters in `src/sockets/ticketSocket.js`, `messageSocket.js`, and `notificationSocket.js`. **SLA monitor** (`src/sockets/slaMonitor.js`, 60s interval) sets `slaBreached`, sets `slaWarningSent`, and creates `sla_breach_warning` notifications (which also emit over sockets).
 
-### Users (STEP 7) — `/api/users`
+### Users  — `/api/users`
 
 - `GET /` — **admin/manager** (manager: own team only); filters `role`, `teamId`, `isActive`
 - `POST /` — **admin** — create user
@@ -120,7 +120,7 @@ REST mutations call emitters in `src/sockets/ticketSocket.js`, `messageSocket.js
 - `PATCH /:id/role` — **admin**
 - `PATCH /:id/team` — **admin/manager**
 
-### Teams (STEP 7) — `/api/teams`
+### Teams  — `/api/teams`
 
 - `GET /` — list teams (scoped for agent/manager)
 - `POST /` — **admin** — create team
@@ -139,7 +139,7 @@ REST mutations call emitters in `src/sockets/ticketSocket.js`, `messageSocket.js
 - `PATCH /:id/read` — mark one read
 - `DELETE /:id` — delete notification
 
-### Analytics (STEP 7) — `/api/analytics` (manager+)
+### Analytics  — `/api/analytics` (manager+)
 
 - `GET /overview` — open, resolved, escalated, SLA-breached counts
 - `GET /ticket-volume` — `from`, `to`, `groupBy=day|week|month`
@@ -149,7 +149,7 @@ REST mutations call emitters in `src/sockets/ticketSocket.js`, `messageSocket.js
 - `GET /sla` — compliance by team/priority
 - `GET /categories` — counts by category
 
-### Audit logs (STEP 7) — `/api/auditlogs` (admin)
+### Audit logs  — `/api/auditlogs` (admin)
 
 - `GET /` — filters: `actorId`, `targetId`, `targetModel`, `action`, `from`, `to`
 - `GET /:id` — single entry
@@ -162,7 +162,7 @@ npm run seed
 
 Creates default team, admin, manager, agent, and customer (override via `SEED_*_EMAIL` / `SEED_*_PASSWORD` env vars).
 
-## Data layer (STEP 3)
+## Data layer
 
 Mongoose models live under `src/modules/**` and are side-effect registered via `src/models/registerModels.js` after MongoDB connects (`src/config/db.js`).
 
