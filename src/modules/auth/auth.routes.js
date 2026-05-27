@@ -1,10 +1,8 @@
 import { Router } from "express";
 import { authenticate } from "../../middleware/authenticate.js";
-import { authorize } from "../../middleware/authorize.js";
+import { optionalAuthenticate } from "../../middleware/optionalAuthenticate.js";
 import { authLimiter } from "../../middleware/rateLimiter.js";
 import { validate } from "../../middleware/validate.js";
-import { asyncHandler } from "../../utils/asyncHandler.js";
-import { User } from "../users/user.model.js";
 import * as controller from "./auth.controller.js";
 import {
   forgotPasswordSchema,
@@ -17,33 +15,13 @@ import {
 
 const router = Router();
 
-/**
- * First bootstrap registration is open; afterwards only admins may create users.
- */
-const requireAdminUnlessBootstrap = asyncHandler(async (req, res, next) => {
-  const count = await User.countDocuments();
-  if (count === 0) {
-    return next();
-  }
-
-  await new Promise((resolve, reject) => {
-    authenticate(req, res, (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(undefined);
-      }
-    });
-  });
-
-  authorize("admin")(req, res, next);
-});
+router.get("/registration-status", authLimiter, controller.registrationStatus);
 
 router.post(
   "/register",
   authLimiter,
+  optionalAuthenticate,
   validate(registerSchema),
-  requireAdminUnlessBootstrap,
   controller.register
 );
 

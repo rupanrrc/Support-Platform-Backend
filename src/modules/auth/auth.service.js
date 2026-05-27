@@ -129,6 +129,32 @@ async function assertTeamExists(teamId) {
   }
 }
 
+const STAFF_ROLES = new Set(["agent", "manager", "admin"]);
+
+/**
+ * Registration availability for the public sign-up page.
+ */
+export async function getRegistrationStatus() {
+  const userCount = await User.countDocuments();
+
+  if (userCount === 0) {
+    return {
+      open: true,
+      mode: "bootstrap",
+      allowedRoles: ["admin"],
+      message: "Create the first administrator account to set up the platform."
+    };
+  }
+
+  return {
+    open: true,
+    mode: "customer",
+    allowedRoles: ["customer"],
+    message:
+      "Sign up as a customer to submit support tickets. Agent and manager accounts are created by an administrator."
+  };
+}
+
 /**
  * @param {{
  *   name: string;
@@ -151,10 +177,22 @@ export async function register(input, requester) {
     if (input.role && input.role !== "admin") {
       throw new ApiError(400, "The first registered user must be an admin");
     }
+  } else if (requester?.role === "admin") {
+    // Admins may create any role (typically use Admin → Users instead).
+    role = input.role ?? "customer";
+    teamId = input.teamId ?? null;
   } else {
-    if (!requester || requester.role !== "admin") {
-      throw new ApiError(403, "Only an admin can register users");
+    if (input.role && STAFF_ROLES.has(input.role)) {
+      throw new ApiError(
+        403,
+        "Agent, manager, and admin accounts can only be created by an administrator."
+      );
     }
+    if (input.teamId) {
+      throw new ApiError(403, "Team assignment is only available when an administrator creates staff accounts.");
+    }
+    role = "customer";
+    teamId = null;
   }
 
   if (role === "agent" || role === "manager") {

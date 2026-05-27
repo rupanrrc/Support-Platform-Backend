@@ -1,6 +1,11 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import * as authService from "./auth.service.js";
 
+export const registrationStatus = asyncHandler(async (_req, res) => {
+  const result = await authService.getRegistrationStatus();
+  res.json(result);
+});
+
 export const register = asyncHandler(async (req, res) => {
   const result = await authService.register(req.validated, req.user);
   res.status(201).json(result);
